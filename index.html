@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.css">
+  <link rel="stylesheet" href="style.css">
+  <title>Simple piskel clone</title>
+</head>
+<body>
+  <h1>Piskel</h1>
+  <header class="header">
+    <img src="./assets/images/piskel-logo.png" alt="piskel-logo">
+
+    <nav class="header--nav">
+      <button class="nav--button" id="createSprite">Create Sprite</button>
+    </nav>
+  </header>
+
+  <main class="main">
+    <section class="description">
+      <h2 class="description--header">Piskel is a free online editor for animated sprites & pixel art</h2>
+      <img src="./assets/images/rolling-scopes.png" alt="screenshot" class="description--image">
+      <br>
+      <button class="description--button">Create Sprite</button>
+    </section>
+
+    <section class="examples">
+      <h3 class="examples--header">Example sprites</h3>
+      <div class="examples--images--container">
+        <img src="./assets/images/christmas tree.gif" alt="christmas tree animation" class="examples--image">
+        <img src="./assets/images/piskel-clone.gif" alt="piskel-clone animation" class="examples--image">
+        <img src="./assets/images/sun.gif" alt="sun animation" class="examples--image">
+        <img src="./assets/images/new year.gif" alt="new year animation" class="examples--image">
+        <img src="./assets/images/rsschool.gif" alt="rolling scopes animation" class="examples--image">
+      </div>
+    </section>
+
+    <section class="functionality">
+      <div class="functionality--item--container">
+        <span class="functionality--item--text">
+          <span class="functionality--item--text--header">Live preview</span><br>
+        Check a preview of your animation in real time as you draw. Adjust the frame delay on the fly.</span>
+        <img src="./assets/images/preview.png" alt="preview" class="functionality--item--image"></img>
+      </div>
+
+      <div class="functionality--item--container">
+        <span class="functionality--item--text">
+          <span class="functionality--item--text--header">Export to .gif</span><br>
+        Export your animation in .gif format</span>
+        <img src="./assets/images/export.png" alt="export" class="functionality--item--image"></img>
+      </div>
+
+      <div class="functionality--item--container">
+        <span class="functionality--item--text">
+          <span class="functionality--item--text--header">Modifiable matrix size</span><br>
+        Change size of canvas matrix from 32x32 to 128x128</span>
+        <img src="./assets/images/matrix-size.png" alt="matrix-size" class="functionality--item--image"></img>
+      </div>
+
+      <div class="functionality--item--container">
+        <span class="functionality--item--text">
+          <span class="functionality--item--text--header">Keyboard shortcuts</span><br>
+        Use shortcuts to tools and frames, to export and fullscreen preview mode. Change them on more handy</span>
+        <img src="./assets/images/shortcuts.png" alt="shortcuts" class="functionality--item--image"></img>
+      </div>
+      
+      <div class="functionality--item--container">
+        <span class="functionality--item--text">
+          <span class="functionality--item--text--header">Google Sign in</span><br>
+          No need to remember yet another password, just use your Google account to sign in.</span>
+        <img src="./assets/images/auth.png" alt="authentification" class="functionality--item--image"></img>
+      </div>
+    </section>
+  </main>
+  
+  <footer class="footer">
+    <span>Created by Andrei Mandryk, student of Rolling Scopes School 2019 Q3</span>
+    <br><span>Brest, 2020</span>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
