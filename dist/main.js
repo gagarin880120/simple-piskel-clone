@@ -2982,7 +2982,11 @@ function initKeyboardModal() {
         e.preventDefault();
         text = "Ctrl + ".concat(codeFromKey(e.code));
         searchForDuplicate(text);
-        document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+
+        if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
+          document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+        }
+
         selectedKey.innerText = text;
 
         if (selectedKey) {
@@ -2996,7 +3000,11 @@ function initKeyboardModal() {
         e.preventDefault();
         text = "Shift + ".concat(codeFromKey(e.code));
         searchForDuplicate(text);
-        document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+
+        if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
+          document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+        }
+
         selectedKey.innerText = text;
 
         if (selectedKey) {
@@ -3010,7 +3018,11 @@ function initKeyboardModal() {
         e.preventDefault();
         text = "Alt + ".concat(codeFromKey(e.code));
         searchForDuplicate(text);
-        document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+
+        if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
+          document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+        }
+
         selectedKey.innerText = text;
 
         if (selectedKey) {
@@ -3022,7 +3034,11 @@ function initKeyboardModal() {
     } else if (Object.values(keyCodes).includes(e.code)) {
       text = codeFromKey(e.code);
       searchForDuplicate(text);
-      document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+
+      if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
+        document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+      }
+
       selectedKey.innerText = text;
 
       if (selectedKey) {
