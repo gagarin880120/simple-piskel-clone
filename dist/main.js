@@ -184,7 +184,7 @@ var toConsumableArray_default = /*#__PURE__*/__webpack_require__.n(toConsumableA
 var style = __webpack_require__(5);
 
 // CONCATENATED MODULE: ./src/utils.js
-function RGBAToHex(array) {
+function getHexFromRGBA(array) {
   return array.slice(0, 3).reduce(function (acc, val) {
     var hexVal = val.toString(16);
     if (hexVal.length === 1) hexVal = "0".concat(hexVal);
@@ -192,7 +192,7 @@ function RGBAToHex(array) {
   }, '#');
 }
 
-function hexToRGBArr(str) {
+function getRGBArrFromHex(str) {
   var hex = str.slice(1);
   var arr = [];
 
@@ -206,7 +206,7 @@ function hexToRGBArr(str) {
   });
 }
 
-function hexToRGBAObj(str) {
+function getRGBAObjFromHex(str) {
   return {
     r: +parseInt(str.slice(1, 3), 16).toString(10),
     g: +parseInt(str.slice(3, 5), 16).toString(10),
@@ -254,11 +254,11 @@ var keyCodes = {
   '-': 'NumpadSubtract'
 };
 
-function textToKey(str) {
+function getKeyCodeFromText(str) {
   return keyCodes[str];
 }
 
-function codeFromKey(key) {
+function getTextFromKeyCode(key) {
   var index = Object.values(keyCodes).indexOf(key);
   return Object.keys(keyCodes)[index];
 }
@@ -293,7 +293,7 @@ function initCanvasTools() {
     e.preventDefault();
   });
 
-  function resize(size) {
+  function resizeMatrix(size) {
     var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     canvas.width = size;
     canvas.height = size;
@@ -313,7 +313,7 @@ function initCanvasTools() {
 
   matrixInput.addEventListener('input', function () {
     matrixSize = 32 * Math.pow(2, matrixInput.value);
-    resize(matrixSize);
+    resizeMatrix(matrixSize);
   });
   var primaryColor = '#ff00ff';
   var secondaryColor = '#0000ff';
@@ -322,7 +322,7 @@ function initCanvasTools() {
     elem.style.background = color;
   }
 
-  function getColors() {
+  function initColors() {
     colorInputPrimary.value = primaryColor;
     colorInputPrimary.addEventListener('input', function (e) {
       primaryColor = e.target.value;
@@ -337,7 +337,7 @@ function initCanvasTools() {
     colorInputSecondary.select();
   }
 
-  function pick(event) {
+  function pickColour(event) {
     var x = event.layerX / (canvasOriginalSize / matrixSize);
     var y = event.layerY / (canvasOriginalSize / matrixSize);
     var pixel = ctx.getImageData(x, y, 1, 1);
@@ -348,7 +348,7 @@ function initCanvasTools() {
       rgba = [255, 255, 255, 255];
     }
 
-    return RGBAToHex(rgba);
+    return getHexFromRGBA(rgba);
   }
 
   colorPickerBtn.addEventListener('click', function () {
@@ -359,10 +359,10 @@ function initCanvasTools() {
   canvas.addEventListener('mousedown', function (e) {
     if (currentTool === 'color-picker') {
       if (e.buttons === 2) {
-        secondaryColor = pick(e);
+        secondaryColor = pickColour(e);
         updateColorEl(secondaryColorEl, secondaryColor);
       } else {
-        primaryColor = pick(e);
+        primaryColor = pickColour(e);
         updateColorEl(primaryColorEl, primaryColor);
       }
     }
@@ -471,7 +471,7 @@ function initCanvasTools() {
     }
   }
 
-  var penMouseDownHandler = function penMouseDownHandler(e) {
+  var penMouseDownAction = function penMouseDownAction(e) {
     if (currentTool !== 'pen') return;
     painting = true;
     ctx.fillStyle = primaryColor;
@@ -483,9 +483,9 @@ function initCanvasTools() {
     drawPixel(e);
   };
 
-  function penTool() {
+  function penToolAction() {
     if (currentTool === 'pen') {
-      canvas.addEventListener('mousedown', penMouseDownHandler);
+      canvas.addEventListener('mousedown', penMouseDownAction);
       canvas.addEventListener('mousemove', draw);
       canvas.addEventListener('mouseup', function () {
         painting = false;
@@ -500,10 +500,10 @@ function initCanvasTools() {
     currentTool = 'pen';
     document.querySelector('.active_tool').classList.remove('active_tool');
     penBtn.classList.toggle('active_tool');
-    penTool();
+    penToolAction();
   });
 
-  function getEraser() {
+  function initEraser() {
     if (currentTool === 'eraser') {
       canvas.addEventListener('mousedown', function (e) {
         drawPixel(e);
@@ -518,7 +518,7 @@ function initCanvasTools() {
     ctx.globalCompositeOperation = 'destination-out';
     document.querySelector('.active_tool').classList.remove('active_tool');
     eraserBtn.classList.toggle('active_tool');
-    getEraser();
+    initEraser();
   });
 
   function getColorAtPixel(imageData, x, y) {
@@ -623,9 +623,9 @@ function initCanvasTools() {
     var y = Math.floor((event.clientY - rect.top) / (canvasOriginalSize / matrixSize));
 
     if (event.buttons === 2) {
-      floodFill(imageData, hexToRGBAObj(secondaryColor), x, y);
+      floodFill(imageData, getRGBAObjFromHex(secondaryColor), x, y);
     } else {
-      floodFill(imageData, hexToRGBAObj(primaryColor), x, y);
+      floodFill(imageData, getRGBAObjFromHex(primaryColor), x, y);
     }
 
     ctx.putImageData(imageData, 0, 0);
@@ -636,7 +636,7 @@ function initCanvasTools() {
     paintBucketBtn.classList.toggle('active_tool');
   });
 
-  function samePixelPainter(event) {
+  function initSamePixelPainter(event) {
     if (currentTool !== 'paint-same-pix') return;
     var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     var data = imageData.data;
@@ -646,8 +646,8 @@ function initCanvasTools() {
 
     var rgba = toConsumableArray_default()(pixel.data);
 
-    var primaryArr = hexToRGBArr(primaryColor);
-    var secondaryArr = hexToRGBArr(secondaryColor);
+    var primaryArr = getRGBArrFromHex(primaryColor);
+    var secondaryArr = getRGBArrFromHex(secondaryColor);
 
     for (var i = 0; i < data.length; i += 4) {
       if (data[i] === rgba[0] && data[i + 1] === rgba[1] && data[i + 2] === rgba[2]) {
@@ -673,42 +673,42 @@ function initCanvasTools() {
     document.querySelector('.active_tool').classList.remove('active_tool');
     paintSamePixBtn.classList.toggle('active_tool');
   });
-  canvas.addEventListener('mousedown', samePixelPainter); // =============================KEYBOARD SHORTCUTS================================
+  canvas.addEventListener('mousedown', initSamePixelPainter); // =============================KEYBOARD SHORTCUTS================================
 
-  function penKeyHandler() {
+  function penKeyAction() {
     currentTool = 'pen';
     document.querySelector('.active_tool').classList.remove('active_tool');
     penBtn.classList.toggle('active_tool');
-    penTool();
+    penToolAction();
   }
 
-  function paintBucketKeyHandler() {
+  function paintBucketKeyAction() {
     currentTool = 'paint-bucket';
     document.querySelector('.active_tool').classList.remove('active_tool');
     paintBucketBtn.classList.toggle('active_tool');
   }
 
-  function colorPickerKeyHandler() {
+  function colorPickerKeyAction() {
     currentTool = 'color-picker';
     document.querySelector('.active_tool').classList.remove('active_tool');
     colorPickerBtn.classList.toggle('active_tool');
   }
 
-  function magicPaintKeyHandler() {
+  function magicPaintKeyAction() {
     currentTool = 'paint-same-pix';
     document.querySelector('.active_tool').classList.remove('active_tool');
     paintSamePixBtn.classList.toggle('active_tool');
   }
 
-  function eraserKeyHandler() {
+  function eraserKeyAction() {
     currentTool = 'eraser';
     ctx.globalCompositeOperation = 'destination-out';
     document.querySelector('.active_tool').classList.remove('active_tool');
     eraserBtn.classList.toggle('active_tool');
-    getEraser();
+    initEraser();
   }
 
-  function increasePenSizeKeyHandler() {
+  function increasePenSizeKeyAction() {
     if (lineThickness >= 4) {
       lineThickness = 1;
       document.querySelector('.active_size').classList.remove('active_size');
@@ -720,7 +720,7 @@ function initCanvasTools() {
     }
   }
 
-  function decreasePenSizeKeyHandler() {
+  function decreasePenSizeKeyAction() {
     if (lineThickness <= 1) {
       lineThickness = 4;
       document.querySelector('.active_size').classList.remove('active_size');
@@ -732,54 +732,54 @@ function initCanvasTools() {
     }
   }
 
-  function toolKey(e, id, handler) {
-    var toolKeyText = document.getElementById(id).innerText;
+  function addKey(e, id, action) {
+    var addKeyText = document.getElementById(id).innerText;
     if (document.querySelector('.modal--window').style.display === 'block') return;
-    if (toolKeyText === '?') return;
+    if (addKeyText === '?') return;
 
-    if (toolKeyText.startsWith('Ctrl')) {
+    if (addKeyText.startsWith('Ctrl')) {
       if (e.ctrlKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(addKeyText.slice(-1))) {
           e.preventDefault();
-          handler();
+          action();
         }
       }
-    } else if (toolKeyText.startsWith('Shift')) {
+    } else if (addKeyText.startsWith('Shift')) {
       if (e.shiftKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(addKeyText.slice(-1))) {
           e.preventDefault();
-          handler();
+          action();
         }
       }
-    } else if (toolKeyText.startsWith('Alt')) {
+    } else if (addKeyText.startsWith('Alt')) {
       if (e.altKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(addKeyText.slice(-1))) {
           e.preventDefault();
-          handler();
+          action();
         }
       }
-    } else if (e.code === textToKey(toolKeyText)) {
+    } else if (e.code === getKeyCodeFromText(addKeyText)) {
       if (e.ctrlKey || e.shiftKey || e.altKey) return;
-      handler();
+      action();
     }
   }
 
   document.addEventListener('keydown', function (event) {
-    toolKey(event, 'penKey', penKeyHandler);
-    toolKey(event, 'pickerKey', colorPickerKeyHandler);
-    toolKey(event, 'paintBucketKey', paintBucketKeyHandler);
-    toolKey(event, 'magicPaintKey', magicPaintKeyHandler);
-    toolKey(event, 'eraserKey', eraserKeyHandler);
-    toolKey(event, 'penSizeIncreaseKey', increasePenSizeKeyHandler);
-    toolKey(event, 'penSizeDecreaseKey', decreasePenSizeKeyHandler);
+    addKey(event, 'penKey', penKeyAction);
+    addKey(event, 'pickerKey', colorPickerKeyAction);
+    addKey(event, 'paintBucketKey', paintBucketKeyAction);
+    addKey(event, 'magicPaintKey', magicPaintKeyAction);
+    addKey(event, 'eraserKey', eraserKeyAction);
+    addKey(event, 'penSizeIncreaseKey', increasePenSizeKeyAction);
+    addKey(event, 'penSizeDecreaseKey', decreasePenSizeKeyAction);
   });
   document.querySelector('#createSprite').addEventListener('click', function () {
     window.open(document.location.href);
   });
 
   window.onload = function () {
-    getColors();
-    penTool();
+    initColors();
+    penToolAction();
     updateColorEl(primaryColorEl, primaryColor);
     updateColorEl(secondaryColorEl, secondaryColor);
   };
@@ -810,7 +810,7 @@ function initFrames() {
   var ctx = canvas.getContext('2d');
   var imageData;
 
-  function activeFrame() {
+  function drawActiveFrame() {
     var active = document.querySelector('.active_frame');
     imageData = active.getContext('2d').getImageData(0, 0, active.width, active.height);
     ctx.putImageData(imageData, 0, 0);
@@ -879,7 +879,7 @@ function initFrames() {
       addFrame();
       var targetCanvas = document.querySelector('.current').closest('.frame_cont').nextSibling.lastChild;
       targetCanvas.getContext('2d').putImageData(imageData, 0, 0);
-      activeFrame();
+      drawActiveFrame();
     });
     deleteBtn.addEventListener('click', function () {
       if (deleteBtn.closest('.frame_cont').classList.contains('active_frame_cont')) {
@@ -887,12 +887,12 @@ function initFrames() {
           deleteBtn.closest('.frame_cont').nextSibling.classList.toggle('active_frame_cont');
           deleteBtn.closest('.frame_cont').nextSibling.lastChild.classList.toggle('active_frame');
           framesContainer.removeChild(deleteBtn.closest('.frame_cont'));
-          activeFrame();
+          drawActiveFrame();
         } else {
           deleteBtn.closest('.frame_cont').previousSibling.classList.toggle('active_frame_cont');
           deleteBtn.closest('.frame_cont').previousSibling.lastChild.classList.toggle('active_frame');
           framesContainer.removeChild(deleteBtn.closest('.frame_cont'));
-          activeFrame();
+          drawActiveFrame();
         }
       } else {
         framesContainer.removeChild(deleteBtn.closest('.frame_cont'));
@@ -932,7 +932,7 @@ function initFrames() {
       document.querySelector('.active_frame').classList.remove('active_frame');
       e.target.classList.toggle('active_frame');
       e.target.parentNode.classList.toggle('active_frame_cont');
-      activeFrame();
+      drawActiveFrame();
     }
   });
   addBtn.addEventListener('click', function () {
@@ -948,7 +948,7 @@ function initFrames() {
     document.querySelector('.active_frame').getContext('2d').putImageData(imageData, 0, 0);
   });
 
-  function newFrameKeyHandler() {
+  function newFrameKeyAction() {
     var activeFrameCont = document.querySelector('.active_frame_cont');
     duplicate = false;
     activeFrameCont.classList.remove('active_frame_cont');
@@ -958,7 +958,7 @@ function initFrames() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  function duplicateFrameKeyHandler() {
+  function duplicateFrameKeyAction() {
     var activeFrameCont = document.querySelector('.active_frame_cont');
 
     if (document.querySelector('.current')) {
@@ -975,10 +975,10 @@ function initFrames() {
     addFrame();
     var targetCanvas = document.querySelector('.current').closest('.frame_cont').nextSibling.lastChild;
     targetCanvas.getContext('2d').putImageData(imageData, 0, 0);
-    activeFrame();
+    drawActiveFrame();
   }
 
-  function deleteKeyHandler() {
+  function deleteKeyAction() {
     var activeFrameCont = document.querySelector('.active_frame_cont');
 
     if (document.querySelectorAll('.frame_cont').length === 1) {
@@ -989,12 +989,12 @@ function initFrames() {
       activeFrameCont.nextSibling.classList.toggle('active_frame_cont');
       activeFrameCont.nextSibling.lastChild.classList.toggle('active_frame');
       framesContainer.removeChild(activeFrameCont);
-      activeFrame();
+      drawActiveFrame();
     } else {
       activeFrameCont.previousSibling.classList.toggle('active_frame_cont');
       activeFrameCont.previousSibling.lastChild.classList.toggle('active_frame');
       framesContainer.removeChild(activeFrameCont);
-      activeFrame();
+      drawActiveFrame();
     }
 
     if (document.querySelectorAll('.delete').length === 1) {
@@ -1002,7 +1002,7 @@ function initFrames() {
     }
   }
 
-  function selectPrevFrameKeyHandler() {
+  function selectPrevFrameKeyAction() {
     var activeFrameCont = document.querySelector('.active_frame_cont');
     var prevFrameCont = activeFrameCont.previousSibling;
     if (!prevFrameCont) return;
@@ -1010,10 +1010,10 @@ function initFrames() {
     document.querySelector('.active_frame').classList.remove('active_frame');
     prevFrameCont.lastChild.classList.toggle('active_frame');
     prevFrameCont.classList.toggle('active_frame_cont');
-    activeFrame();
+    drawActiveFrame();
   }
 
-  function selectNextFrameKeyHandler() {
+  function selectNextFrameKeyAction() {
     var activeFrameCont = document.querySelector('.active_frame_cont');
     var nextFrameCont = activeFrameCont.nextSibling;
     if (!nextFrameCont) return;
@@ -1021,49 +1021,49 @@ function initFrames() {
     document.querySelector('.active_frame').classList.remove('active_frame');
     nextFrameCont.lastChild.classList.toggle('active_frame');
     nextFrameCont.classList.toggle('active_frame_cont');
-    activeFrame();
+    drawActiveFrame();
   }
 
-  function toolKey(e, id, handler) {
-    var toolKeyText = document.getElementById(id).innerText;
+  function addKey(e, id, action) {
+    var keyElementText = document.getElementById(id).innerText;
     if (document.querySelector('.modal--window').style.display === 'block') return;
-    if (toolKeyText === '?') return;
+    if (keyElementText === '?') return;
 
-    if (toolKeyText.startsWith('Ctrl')) {
+    if (keyElementText.startsWith('Ctrl')) {
       if (e.ctrlKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(keyElementText.slice(-1))) {
           e.preventDefault();
-          handler();
+          action();
         }
       }
-    } else if (toolKeyText.startsWith('Shift')) {
+    } else if (keyElementText.startsWith('Shift')) {
       if (e.shiftKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(keyElementText.slice(-1))) {
           e.preventDefault();
-          handler();
+          action();
         }
       }
-    } else if (toolKeyText.startsWith('Alt')) {
+    } else if (keyElementText.startsWith('Alt')) {
       if (e.altKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(keyElementText.slice(-1))) {
           e.preventDefault();
-          handler();
+          action();
         }
       }
-    } else if (e.code === textToKey(toolKeyText)) {
+    } else if (e.code === getKeyCodeFromText(keyElementText)) {
       if (e.ctrlKey || e.shiftKey || e.altKey) return;
-      handler();
+      action();
     }
   }
 
   document.addEventListener('keydown', function (event) {
-    toolKey(event, 'newFrameKey', newFrameKeyHandler);
-    toolKey(event, 'duplicateFrameKey', duplicateFrameKeyHandler);
-    toolKey(event, 'previousFrameKey', selectPrevFrameKeyHandler);
-    toolKey(event, 'nextFrameKey', selectNextFrameKeyHandler);
+    addKey(event, 'newFrameKey', newFrameKeyAction);
+    addKey(event, 'duplicateFrameKey', duplicateFrameKeyAction);
+    addKey(event, 'previousFrameKey', selectPrevFrameKeyAction);
+    addKey(event, 'nextFrameKey', selectNextFrameKeyAction);
 
     if (event.code === 'Delete') {
-      deleteKeyHandler();
+      deleteKeyAction();
     }
   });
 }
@@ -1136,39 +1136,39 @@ function initPreview() {
 
   fullScreenBtn.addEventListener('click', toggleFullScreen);
 
-  function getKey(e) {
-    var toolKeyText = document.getElementById('fullScreenKey').innerText;
+  function addKey(e) {
+    var addKeyText = document.getElementById('fullScreenKey').innerText;
     if (document.querySelector('.modal--window').style.display === 'block') return;
-    if (toolKeyText === '?') return;
+    if (addKeyText === '?') return;
 
-    if (toolKeyText.startsWith('Ctrl')) {
+    if (addKeyText.startsWith('Ctrl')) {
       if (e.ctrlKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(addKeyText.slice(-1))) {
           e.preventDefault();
           toggleFullScreen();
         }
       }
-    } else if (toolKeyText.startsWith('Shift')) {
+    } else if (addKeyText.startsWith('Shift')) {
       if (e.shiftKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(addKeyText.slice(-1))) {
           e.preventDefault();
           toggleFullScreen();
         }
       }
-    } else if (toolKeyText.startsWith('Alt')) {
+    } else if (addKeyText.startsWith('Alt')) {
       if (e.altKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(addKeyText.slice(-1))) {
           e.preventDefault();
           toggleFullScreen();
         }
       }
-    } else if (e.code === textToKey(toolKeyText)) {
+    } else if (e.code === getKeyCodeFromText(addKeyText)) {
       if (e.ctrlKey || e.shiftKey || e.altKey) return;
       toggleFullScreen();
     }
   }
 
-  document.addEventListener('keydown', getKey);
+  document.addEventListener('keydown', addKey);
 }
 // EXTERNAL MODULE: ./src/screens/export/export-style.css
 var export_style = __webpack_require__(8);
@@ -2655,39 +2655,39 @@ function initExport() {
     cancelable: true
   });
 
-  function getKey(e) {
-    var toolKeyText = document.getElementById('exportKey').innerText;
+  function addKey(e) {
+    var addKeyText = document.getElementById('exportKey').innerText;
     if (document.querySelector('.modal--window').style.display === 'block') return;
-    if (toolKeyText === '?') return;
+    if (addKeyText === '?') return;
 
-    if (toolKeyText.startsWith('Ctrl')) {
+    if (addKeyText.startsWith('Ctrl')) {
       if (e.ctrlKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(addKeyText.slice(-1))) {
           e.preventDefault();
           exportBtn.dispatchEvent(exportKeyEvent);
         }
       }
-    } else if (toolKeyText.startsWith('Shift')) {
+    } else if (addKeyText.startsWith('Shift')) {
       if (e.shiftKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(addKeyText.slice(-1))) {
           e.preventDefault();
           exportBtn.dispatchEvent(exportKeyEvent);
         }
       }
-    } else if (toolKeyText.startsWith('Alt')) {
+    } else if (addKeyText.startsWith('Alt')) {
       if (e.altKey) {
-        if (e.code === textToKey(toolKeyText.slice(-1))) {
+        if (e.code === getKeyCodeFromText(addKeyText.slice(-1))) {
           e.preventDefault();
           exportBtn.dispatchEvent(exportKeyEvent);
         }
       }
-    } else if (e.code === textToKey(toolKeyText)) {
+    } else if (e.code === getKeyCodeFromText(addKeyText)) {
       if (e.ctrlKey || e.shiftKey || e.altKey) return;
       exportBtn.dispatchEvent(exportKeyEvent);
     }
   }
 
-  document.addEventListener('keydown', getKey);
+  document.addEventListener('keydown', addKey);
 }
 // CONCATENATED MODULE: ./src/components/modal-dialog/keyboard-modal.js
 
@@ -2980,7 +2980,7 @@ function initKeyboardModal() {
     if (e.ctrlKey) {
       if (Object.values(keyCodes).includes(e.code)) {
         e.preventDefault();
-        text = "Ctrl + ".concat(codeFromKey(e.code));
+        text = "Ctrl + ".concat(getTextFromKeyCode(e.code));
         searchForDuplicate(text);
 
         if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
@@ -2998,7 +2998,7 @@ function initKeyboardModal() {
     } else if (e.shiftKey) {
       if (Object.values(keyCodes).includes(e.code)) {
         e.preventDefault();
-        text = "Shift + ".concat(codeFromKey(e.code));
+        text = "Shift + ".concat(getTextFromKeyCode(e.code));
         searchForDuplicate(text);
 
         if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
@@ -3016,7 +3016,7 @@ function initKeyboardModal() {
     } else if (e.altKey) {
       if (Object.values(keyCodes).includes(e.code)) {
         e.preventDefault();
-        text = "Alt + ".concat(codeFromKey(e.code));
+        text = "Alt + ".concat(getTextFromKeyCode(e.code));
         searchForDuplicate(text);
 
         if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
@@ -3032,7 +3032,7 @@ function initKeyboardModal() {
         change = false;
       }
     } else if (Object.values(keyCodes).includes(e.code)) {
-      text = codeFromKey(e.code);
+      text = getTextFromKeyCode(e.code);
       searchForDuplicate(text);
 
       if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
@@ -3065,7 +3065,7 @@ function initKeyboardModal() {
 /* eslint-disable no-unused-vars */
 
 /* eslint-disable no-undef */
-function init() {
+function initAuth() {
   var provider = new firebase.auth.GoogleAuthProvider();
   document.querySelector('#signIn').addEventListener('click', function () {
     firebase.auth().signInWithPopup(provider).then(function (result) {
@@ -3168,7 +3168,7 @@ initFrames();
 initPreview();
 initExport();
 initHints();
-init();
+initAuth();
 
 /***/ })
 /******/ ]);
