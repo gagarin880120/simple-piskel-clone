@@ -88,6 +88,12 @@
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
+// extracted by mini-css-extract-plugin
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
 var arrayWithoutHoles = __webpack_require__(2);
 
 var iterableToArray = __webpack_require__(3);
@@ -99,12 +105,6 @@ function _toConsumableArray(arr) {
 }
 
 module.exports = _toConsumableArray;
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// extracted by mini-css-extract-plugin
 
 /***/ }),
 /* 2 */
@@ -174,10 +174,10 @@ module.exports = _nonIterableSpread;
 __webpack_require__.r(__webpack_exports__);
 
 // EXTERNAL MODULE: ./src/components/modal-dialog/keyboard-modal-style.css
-var keyboard_modal_style = __webpack_require__(1);
+var keyboard_modal_style = __webpack_require__(0);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/toConsumableArray.js
-var toConsumableArray = __webpack_require__(0);
+var toConsumableArray = __webpack_require__(1);
 var toConsumableArray_default = /*#__PURE__*/__webpack_require__.n(toConsumableArray);
 
 // EXTERNAL MODULE: ./src/screens/canvas/style.css
@@ -266,11 +266,10 @@ function codeFromKey(key) {
 
 // CONCATENATED MODULE: ./src/screens/canvas/index.js
 
-// eslint-disable-next-line no-unused-vars
 
 
 
-function getCanvasTools() {
+function initCanvasTools() {
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
   var matrixInput = document.getElementById('matrixInput');
@@ -460,7 +459,7 @@ function getCanvasTools() {
   }
 
   function drawPixel(e) {
-    if (currentTool === 'color-picker' || currentTool === 'paint-same-pix') return;
+    if (currentTool === 'color-picker' || currentTool === 'paint-same-pix' || currentTool === 'paint-bucket') return;
     lastX = e.pageX - canvas.offsetLeft;
     lastY = e.pageY - canvas.offsetTop;
     ctx.fillRect(Math.floor(lastX / (canvasOriginalSize / matrixSize)), Math.floor(lastY / (canvasOriginalSize / matrixSize)), lineThickness, lineThickness);
@@ -789,10 +788,9 @@ function getCanvasTools() {
 var frames_style = __webpack_require__(6);
 
 // CONCATENATED MODULE: ./src/components/frames-list/frames.js
-// eslint-disable-next-line no-unused-vars
 
 
-function getFrames() {
+function initFrames() {
   var framesWrapper = document.createElement('div');
   framesWrapper.className = 'frames_wrapper';
   document.querySelector('.main').appendChild(framesWrapper);
@@ -801,7 +799,8 @@ function getFrames() {
   framesWrapper.appendChild(framesContainer); // eslint-disable-next-line no-undef
 
   $('#sortable').sortable({
-    placeholder: 'sortable_placeholder'
+    placeholder: 'sortable_placeholder',
+    axis: 'y'
   });
   var addBtn = document.createElement('div');
   addBtn.innerHTML = '<i class="fas fa-plus"></i><p>Add new frame</p>';
@@ -829,17 +828,34 @@ function getFrames() {
       framesContainer.insertBefore(frameCont, document.querySelector('.current').closest('.frame_cont').nextSibling);
     }
 
-    var buttonsCont = document.createElement('div');
-    buttonsCont.className = 'frame_buttons--container';
-    frameCont.appendChild(buttonsCont);
     var duplicateBtn = document.createElement('button');
     duplicateBtn.className = 'frame_button duplicate';
     duplicateBtn.innerHTML = '<i class="fas fa-copy"></i>';
-    buttonsCont.appendChild(duplicateBtn);
+    frameCont.appendChild(duplicateBtn);
+    var duplicateFrameHint = document.createElement('span');
+    duplicateFrameHint.className = 'hint frame-button';
+    duplicateFrameHint.innerText = 'Duplicate this frame';
+    duplicateBtn.appendChild(duplicateFrameHint);
+    duplicateBtn.addEventListener('mouseover', function () {
+      duplicateFrameHint.style.display = 'inline';
+    });
+    duplicateBtn.addEventListener('mouseout', function () {
+      duplicateFrameHint.style.display = 'none';
+    });
     var deleteBtn = document.createElement('button');
     deleteBtn.className = 'frame_button delete';
     deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-    buttonsCont.appendChild(deleteBtn);
+    frameCont.appendChild(deleteBtn);
+    var deleteFrameHint = document.createElement('span');
+    deleteFrameHint.className = 'hint frame-button';
+    deleteFrameHint.innerText = 'Delete this frame';
+    deleteBtn.appendChild(deleteFrameHint);
+    deleteBtn.addEventListener('mouseover', function () {
+      deleteFrameHint.style.display = 'inline';
+    });
+    deleteBtn.addEventListener('mouseout', function () {
+      deleteFrameHint.style.display = 'none';
+    });
 
     if (document.querySelectorAll('.frame').length > 0) {
       deleteBtn.style.display = 'inline';
@@ -1055,10 +1071,9 @@ function getFrames() {
 var preview_style = __webpack_require__(7);
 
 // CONCATENATED MODULE: ./src/screens/preview/preview.js
-// eslint-disable-next-line no-unused-vars
 
 
-function getPreview() {
+function initPreview() {
   var previewContainer = document.createElement('div');
   previewContainer.className = 'preview--container';
   document.querySelector('.main').appendChild(previewContainer);
@@ -1119,7 +1134,7 @@ function getPreview() {
     }
   }
 
-  fullScreenBtn.addEventListener('click', toggleFullScreen); // ========================================KEYBOARD SHORTCUT==========================================
+  fullScreenBtn.addEventListener('click', toggleFullScreen);
 
   function getKey(e) {
     var toolKeyText = document.getElementById('fullScreenKey').innerText;
@@ -1419,7 +1434,6 @@ function LZWEncoder() {
   LZWEncoder.apply(this, arguments);
   return exports;
 }
-;
 // CONCATENATED MODULE: ./src/screens/export/NeuQuant.js
 /*
  * NeuQuant Neural-Net Quantization Algorithm
@@ -1466,16 +1480,16 @@ function NeuQuant() {
   /* minimum size for input image */
 
   /*
-   * Program Skeleton ---------------- [select samplefac in range 1..30] [read
-   * image from input file] pic = (unsigned char*) malloc(3*width*height);
-   * initnet(pic,3*width*height,samplefac); learn(); unbiasnet(); [write output
-   * image header, using writecolourmap(f)] inxbuild(); write output image using
-   * inxsearch(b,g,r)
-   */
+  * Program Skeleton ---------------- [select samplefac in range 1..30] [read
+  * image from input file] pic = (unsigned char*) malloc(3*width*height);
+  * initnet(pic,3*width*height,samplefac); learn(); unbiasnet(); [write output
+  * image header, using writecolourmap(f)] inxbuild(); write output image using
+  * inxsearch(b,g,r)
+  */
 
   /*
-   * Network Definitions -------------------
-   */
+  * Network Definitions -------------------
+  */
 
   var maxnetpos = netsize - 1;
   var netbiasshift = 4;
@@ -1530,8 +1544,8 @@ function NeuQuant() {
   var alpharadbshift = alphabiasshift + radbiasshift;
   var alpharadbias = 1 << alpharadbshift;
   /*
-   * Types and Global Variables --------------------------
-   */
+  * Types and Global Variables --------------------------
+  */
 
   var thepicture;
   /* the input image itself */
@@ -1594,10 +1608,10 @@ function NeuQuant() {
     return map;
   };
   /*
-   * Insertion sort of network and building of netindex[0..255] (to do after
-   * unbias)
-   * -------------------------------------------------------------------------------
-   */
+  * Insertion sort of network and building of netindex[0..255] (to do after
+  * unbias)
+  * -------------------------------------------------------------------------------
+  */
 
 
   var inxbuild = function inxbuild() {
@@ -1672,8 +1686,8 @@ function NeuQuant() {
 
   };
   /*
-   * Main Learning Loop ------------------
-   */
+  * Main Learning Loop ------------------
+  */
 
 
   var learn = function learn() {
@@ -1707,11 +1721,7 @@ function NeuQuant() {
       radpower[i] = alpha * ((rad * rad - i * i) * radbias / (rad * rad));
     }
 
-    if (lengthcount < minpicturebytes) step = 3;else if (lengthcount % prime1 !== 0) step = 3 * prime1;else {
-      if (lengthcount % prime2 !== 0) step = 3 * prime2;else {
-        if (lengthcount % prime3 !== 0) step = 3 * prime3;else step = 3 * prime4;
-      }
-    }
+    if (lengthcount < minpicturebytes) step = 3;else if (lengthcount % prime1 !== 0) step = 3 * prime1;else if (lengthcount % prime2 !== 0) step = 3 * prime2;else if (lengthcount % prime3 !== 0) step = 3 * prime3;else step = 3 * prime4;
     i = 0;
 
     while (i < samplepixels) {
@@ -1741,10 +1751,10 @@ function NeuQuant() {
     }
   };
   /*
-   ** Search for BGR values 0..255 (after net is unbiased) and return colour
-   * index
-   * ----------------------------------------------------------------------------
-   */
+  ** Search for BGR values 0..255 (after net is unbiased) and return colour
+  * index
+  * ----------------------------------------------------------------------------
+  */
 
 
   var map = exports.map = function map(b, g, r) {
@@ -1831,10 +1841,10 @@ function NeuQuant() {
     return colorMap();
   };
   /*
-   * Unbias network to give byte values 0..255 and record position i to prepare
-   * for sort
-   * -----------------------------------------------------------------------------------
-   */
+  * Unbias network to give byte values 0..255 and record position i to prepare
+  * for sort
+  * -----------------------------------------------------------------------------------
+  */
 
 
   var unbiasnet = function unbiasnet() {
@@ -1850,10 +1860,10 @@ function NeuQuant() {
     }
   };
   /*
-   * Move adjacent neurons by precomputed alpha*(1-((i-j)^2/[r]^2)) in
-   * radpower[|i-j|]
-   * ---------------------------------------------------------------------------------
-   */
+  * Move adjacent neurons by precomputed alpha*(1-((i-j)^2/[r]^2)) in
+  * radpower[|i-j|]
+  * ---------------------------------------------------------------------------------
+  */
 
 
   var alterneigh = function alterneigh(rad, i, b, g, r) {
@@ -1898,9 +1908,9 @@ function NeuQuant() {
     }
   };
   /*
-   * Move neuron i towards biased (b,g,r) by factor alpha
-   * ----------------------------------------------------
-   */
+  * Move neuron i towards biased (b,g,r) by factor alpha
+  * ----------------------------------------------------
+  */
 
 
   var altersingle = function altersingle(alpha, i, b, g, r) {
@@ -1911,8 +1921,8 @@ function NeuQuant() {
     n[2] -= alpha * (n[2] - r) / initalpha;
   };
   /*
-   * Search for biased BGR values ----------------------------
-   */
+  * Search for biased BGR values ----------------------------
+  */
 
 
   var contest = function contest(b, g, r) {
@@ -1974,7 +1984,6 @@ function NeuQuant() {
   NeuQuant.apply(this, arguments);
   return exports;
 }
-;
 // CONCATENATED MODULE: ./src/screens/export/GIFEncoder.js
 /**
  * This class lets you encode animated GIF files
@@ -2008,14 +2017,14 @@ function GIFEncoder() {
   };
 
   ByteArray.prototype.writeUTFBytes = function (string) {
-    for (var l = string.length, i = 0; i < l; i++) {
-      this.writeByte(string.charCodeAt(i));
+    for (var l = string.length, _i = 0; _i < l; _i++) {
+      this.writeByte(string.charCodeAt(_i));
     }
   };
 
   ByteArray.prototype.writeBytes = function (array, offset, length) {
-    for (var l = length || array.length, i = offset || 0; i < l; i++) {
-      this.writeByte(array[i]);
+    for (var l = length || array.length, _i2 = offset || 0; _i2 < l; _i2++) {
+      this.writeByte(array[_i2]);
     }
   };
 
@@ -2057,79 +2066,79 @@ function GIFEncoder() {
 
   var sample = 10; // default sample interval for quantizer
 
-  var comment = "Generated by jsgif (https://github.com/antimatter15/jsgif/)"; // default comment for generated gif
+  var comment = 'Generated by jsgif (https://github.com/antimatter15/jsgif/)'; // default comment for generated gif
 
   /**
-   * Sets the delay time between each frame, or changes it for subsequent frames
-   * (applies to last frame added)
-   * int delay time in milliseconds
-   * @param ms
-   */
+  * Sets the delay time between each frame, or changes it for subsequent frames
+  * (applies to last frame added)
+  * int delay time in milliseconds
+  * @param ms
+  */
 
   var setDelay = exports.setDelay = function setDelay(ms) {
     delay = Math.round(ms / 10);
   };
   /**
-   * Sets the GIF frame disposal code for the last added frame and any
-   *
-   * subsequent frames. Default is 0 if no transparent color has been set,
-   * otherwise 2.
-   * @param code
-   * int disposal code.
-   */
+  * Sets the GIF frame disposal code for the last added frame and any
+  *
+  * subsequent frames. Default is 0 if no transparent color has been set,
+  * otherwise 2.
+  * @param code
+  * int disposal code.
+  */
 
 
   var setDispose = exports.setDispose = function setDispose(code) {
     if (code >= 0) dispose = code;
   };
   /**
-   * Sets the number of times the set of GIF frames should be played. Default is
-   * 1; 0 means play indefinitely. Must be invoked before the first image is
-   * added.
-   *
-   * @param iter
-   * int number of iterations.
-   * @return
-   */
+  * Sets the number of times the set of GIF frames should be played. Default is
+  * 1; 0 means play indefinitely. Must be invoked before the first image is
+  * added.
+  *
+  * @param iter
+  * int number of iterations.
+  * @return
+  */
 
 
   var setRepeat = exports.setRepeat = function setRepeat(iter) {
     if (iter >= 0) repeat = iter;
   };
   /**
-   * Sets the transparent color for the last added frame and any subsequent
-   * frames. Since all colors are subject to modification in the quantization
-   * process, the color in the final palette for each frame closest to the given
-   * color becomes the transparent color for that frame. May be set to null to
-   * indicate no transparent color.
-   * @param
-   * Color to be treated as transparent on display.
-   */
+  * Sets the transparent color for the last added frame and any subsequent
+  * frames. Since all colors are subject to modification in the quantization
+  * process, the color in the final palette for each frame closest to the given
+  * color becomes the transparent color for that frame. May be set to null to
+  * indicate no transparent color.
+  * @param
+  * Color to be treated as transparent on display.
+  */
 
 
   var setTransparent = exports.setTransparent = function setTransparent(c) {
     transparent = c;
   };
   /**
-   * Sets the comment for the block comment
-   * @param
-   * string to be insterted as comment
-   */
+  * Sets the comment for the block comment
+  * @param
+  * string to be insterted as comment
+  */
 
 
   var setComment = exports.setComment = function setComment(c) {
     comment = c;
   };
   /**
-   * The addFrame method takes an incoming BitmapData object to create each frames
-   * @param
-   * BitmapData object to be treated as a GIF's frame
-   */
+  * The addFrame method takes an incoming BitmapData object to create each frames
+  * @param
+  * BitmapData object to be treated as a GIF's frame
+  */
 
 
   var addFrame = exports.addFrame = function addFrame(im, is_imageData) {
     if (im === null || !started || out === null) {
-      throw new Error("Please call start method before calling addFrame");
+      throw new Error('Please call start method before calling addFrame');
     }
 
     var ok = true;
@@ -2138,24 +2147,22 @@ function GIFEncoder() {
       if (!is_imageData) {
         image = im.getImageData(0, 0, im.canvas.width, im.canvas.height).data;
         if (!sizeSet) setSize(im.canvas.width, im.canvas.height);
-      } else {
-        if (im instanceof ImageData) {
-          image = im.data;
+      } else if (im instanceof ImageData) {
+        image = im.data;
 
-          if (!sizeset || width != im.width || height != im.height) {
-            setSize(im.width, im.height);
-          } else {}
-        } else if (im instanceof Uint8ClampedArray) {
-          if (im.length == width * height * 4) {
-            image = im;
-          } else {
-            console.log("Please set the correct size: ImageData length mismatch");
-            ok = false;
-          }
+        if (!sizeset || width != im.width || height != im.height) {
+          setSize(im.width, im.height);
+        } else {}
+      } else if (im instanceof Uint8ClampedArray) {
+        if (im.length == width * height * 4) {
+          image = im;
         } else {
-          console.log("Please provide correct input");
+          console.log('Please set the correct size: ImageData length mismatch');
           ok = false;
         }
+      } else {
+        console.log('Please provide correct input');
+        ok = false;
       }
 
       getImagePixels(); // convert to correct format if necessary
@@ -2206,21 +2213,21 @@ function GIFEncoder() {
 
   var download = exports.download = function download(filename) {
     if (out === null || closeStream == false) {
-      console.log("Please call start method and add frames and call finish method before calling download");
+      console.log('Please call start method and add frames and call finish method before calling download');
     } else {
-      filename = filename !== undefined ? filename.endsWith(".gif") ? filename : filename + ".gif" : "download.gif";
-      var templink = document.createElement("a");
+      filename = filename !== undefined ? filename.endsWith('.gif') ? filename : "".concat(filename, ".gif") : 'download.gif';
+      var templink = document.createElement('a');
       templink.download = filename;
       templink.href = URL.createObjectURL(new Blob([new Uint8Array(out.bin)], {
-        type: "image/gif"
+        type: 'image/gif'
       }));
       templink.click();
     }
   };
   /**
-   * Adds final trailer to the GIF stream, if you don't call the finish method
-   * the GIF stream will not be valid.
-   */
+  * Adds final trailer to the GIF stream, if you don't call the finish method
+  * the GIF stream will not be valid.
+  */
 
 
   var finish = exports.finish = function finish() {
@@ -2239,9 +2246,9 @@ function GIFEncoder() {
     return ok;
   };
   /**
-   * Resets some members so that a new stream can be started.
-   * This method is actually called by the start method
-   */
+  * Resets some members so that a new stream can be started.
+  * This method is actually called by the start method
+  */
 
 
   var reset = function reset() {
@@ -2255,26 +2262,26 @@ function GIFEncoder() {
     firstFrame = true;
   };
   /**
-   * * Sets frame rate in frames per second. Equivalent to
-   * <code>setDelay(1000/fps)</code>.
-   * @param fps
-   * float frame rate (frames per second)
-   */
+  * * Sets frame rate in frames per second. Equivalent to
+  * <code>setDelay(1000/fps)</code>.
+  * @param fps
+  * float frame rate (frames per second)
+  */
 
 
   var setFrameRate = exports.setFrameRate = function setFrameRate(fps) {
     if (fps != 0xf) delay = Math.round(100 / fps);
   };
   /**
-   * Sets quality of color quantization (conversion of images to the maximum 256
-   * colors allowed by the GIF specification). Lower values (minimum = 1)
-   * produce better colors, but slow processing significantly. 10 is the
-   * default, and produces good color mapping at reasonable speeds. Values
-   * greater than 20 do not yield significant improvements in speed.
-   * @param quality
-   * int greater than 0.
-   * @return
-   */
+  * Sets quality of color quantization (conversion of images to the maximum 256
+  * colors allowed by the GIF specification). Lower values (minimum = 1)
+  * produce better colors, but slow processing significantly. 10 is the
+  * default, and produces good color mapping at reasonable speeds. Values
+  * greater than 20 do not yield significant improvements in speed.
+  * @param quality
+  * int greater than 0.
+  * @return
+  */
 
 
   var setQuality = exports.setQuality = function setQuality(quality) {
@@ -2282,13 +2289,13 @@ function GIFEncoder() {
     sample = quality;
   };
   /**
-   * Sets the GIF frame size. The default size is the size of the first frame
-   * added if this method is not invoked.
-   * @param w
-   * int frame width.
-   * @param h
-   * int frame width.
-   */
+  * Sets the GIF frame size. The default size is the size of the first frame
+  * added if this method is not invoked.
+  * @param w
+  * int frame width.
+  * @param h
+  * int frame width.
+  */
 
 
   var setSize = exports.setSize = function setSize(w, h) {
@@ -2300,11 +2307,11 @@ function GIFEncoder() {
     sizeSet = true;
   };
   /**
-   * Initiates GIF file creation on the given stream.
-   * @param os
-   * OutputStream on which GIF images are written.
-   * @return false if initial write failed.
-   */
+  * Initiates GIF file creation on the given stream.
+  * @param os
+  * OutputStream on which GIF images are written.
+  * @return false if initial write failed.
+  */
 
 
   var start = exports.start = function start() {
@@ -2314,7 +2321,7 @@ function GIFEncoder() {
     out = new ByteArray();
 
     try {
-      out.writeUTFBytes("GIF89a"); // header
+      out.writeUTFBytes('GIF89a'); // header
     } catch (e) {
       ok = false;
     }
@@ -2330,8 +2337,8 @@ function GIFEncoder() {
     return started = ok;
   };
   /**
-   * Analyzes image colors and creates color map.
-   */
+  * Analyzes image colors and creates color map.
+  */
 
 
   var analyzePixels = function analyzePixels() {
@@ -2360,8 +2367,8 @@ function GIFEncoder() {
     }
   };
   /**
-   * Returns index of palette color closest to c
-   */
+  * Returns index of palette color closest to c
+  */
 
 
   var findClosest = function findClosest(c) {
@@ -2373,26 +2380,26 @@ function GIFEncoder() {
     var dmin = 256 * 256 * 256;
     var len = colorTab.length;
 
-    for (var i = 0; i < len;) {
-      var dr = r - (colorTab[i++] & 0xff);
-      var dg = g - (colorTab[i++] & 0xff);
-      var db = b - (colorTab[i] & 0xff);
+    for (var _i3 = 0; _i3 < len;) {
+      var dr = r - (colorTab[_i3++] & 0xff);
+      var dg = g - (colorTab[_i3++] & 0xff);
+      var db = b - (colorTab[_i3] & 0xff);
       var d = dr * dr + dg * dg + db * db;
-      var index = i / 3;
+      var index = _i3 / 3;
 
       if (usedEntry[index] && d < dmin) {
         dmin = d;
         minpos = index;
       }
 
-      i++;
+      _i3++;
     }
 
     return minpos;
   };
   /**
-   * Extracts image pixels into byte array "pixels
-   */
+  * Extracts image pixels into byte array "pixels
+  */
 
 
   var getImagePixels = function getImagePixels() {
@@ -2402,9 +2409,9 @@ function GIFEncoder() {
     var data = image;
     var count = 0;
 
-    for (var i = 0; i < h; i++) {
+    for (var _i4 = 0; _i4 < h; _i4++) {
       for (var j = 0; j < w; j++) {
-        var b = i * w * 4 + j * 4;
+        var b = _i4 * w * 4 + j * 4;
         pixels[count++] = data[b];
         pixels[count++] = data[b + 1];
         pixels[count++] = data[b + 2];
@@ -2412,8 +2419,8 @@ function GIFEncoder() {
     }
   };
   /**
-   * Writes Graphic Control Extension
-   */
+  * Writes Graphic Control Extension
+  */
 
 
   var writeGraphicCtrlExt = function writeGraphicCtrlExt() {
@@ -2440,10 +2447,10 @@ function GIFEncoder() {
 
     disp <<= 2; // packed fields
 
-    out.writeByte(0 | // 1:3 reserved
-    disp | // 4:6 disposal
-    0 | // 7 user input - 0 = none
-    transp); // 8 transparency flag
+    out.writeByte(0 // 1:3 reserved
+    | disp // 4:6 disposal
+    | 0 // 7 user input - 0 = none
+    | transp); // 8 transparency flag
 
     WriteShort(delay); // delay x 1/100 sec
 
@@ -2452,8 +2459,8 @@ function GIFEncoder() {
     out.writeByte(0); // block terminator
   };
   /**
-   * Writes Comment Extention
-   */
+  * Writes Comment Extention
+  */
 
 
   var writeCommentExt = function writeCommentExt() {
@@ -2467,8 +2474,8 @@ function GIFEncoder() {
     out.writeByte(0); // block terminator
   };
   /**
-   * Writes Image Descriptor
-   */
+  * Writes Image Descriptor
+  */
 
 
   var writeImageDesc = function writeImageDesc() {
@@ -2486,16 +2493,16 @@ function GIFEncoder() {
       out.writeByte(0);
     } else {
       // specify normal LCT
-      out.writeByte(0x80 | // 1 local color table 1=yes
-      0 | // 2 interlace - 0=no
-      0 | // 3 sorted - 0=no
-      0 | // 4-5 reserved
-      palSize); // 6-8 size of color table
+      out.writeByte(0x80 // 1 local color table 1=yes
+      | 0 // 2 interlace - 0=no
+      | 0 // 3 sorted - 0=no
+      | 0 // 4-5 reserved
+      | palSize); // 6-8 size of color table
     }
   };
   /**
-   * Writes Logical Screen Descriptor
-   */
+  * Writes Logical Screen Descriptor
+  */
 
 
   var writeLSD = function writeLSD() {
@@ -2503,18 +2510,18 @@ function GIFEncoder() {
     WriteShort(width);
     WriteShort(height); // packed fields
 
-    out.writeByte(0x80 | // 1 : global color table flag = 1 (gct used)
-    0x70 | // 2-4 : color resolution = 7
-    0x00 | // 5 : gct sort flag = 0
-    palSize); // 6-8 : gct size
+    out.writeByte(0x80 // 1 : global color table flag = 1 (gct used)
+    | 0x70 // 2-4 : color resolution = 7
+    | 0x00 // 5 : gct sort flag = 0
+    | palSize); // 6-8 : gct size
 
     out.writeByte(0); // background color index
 
     out.writeByte(0); // pixel aspect ratio - assume 1:1
   };
   /**
-   * Writes Netscape application extension to define repeat count.
-   */
+  * Writes Netscape application extension to define repeat count.
+  */
 
 
   var writeNetscapeExt = function writeNetscapeExt() {
@@ -2524,7 +2531,7 @@ function GIFEncoder() {
 
     out.writeByte(11); // block size
 
-    out.writeUTFBytes("NETSCAPE" + "2.0"); // app id + auth code
+    out.writeUTFBytes('NETSCAPE' + '2.0'); // app id + auth code
 
     out.writeByte(3); // sub-block size
 
@@ -2535,15 +2542,15 @@ function GIFEncoder() {
     out.writeByte(0); // block terminator
   };
   /**
-   * Writes color table
-   */
+  * Writes color table
+  */
 
 
   var writePalette = function writePalette() {
     out.writeBytes(colorTab);
     var n = 3 * 256 - colorTab.length;
 
-    for (var i = 0; i < n; i++) {
+    for (var _i5 = 0; _i5 < n; _i5++) {
       out.writeByte(0);
     }
   };
@@ -2553,8 +2560,8 @@ function GIFEncoder() {
     out.writeByte(pValue >> 8 & 0xFF);
   };
   /**
-   * Encodes and writes pixel data
-   */
+  * Encodes and writes pixel data
+  */
 
 
   var writePixels = function writePixels() {
@@ -2562,8 +2569,8 @@ function GIFEncoder() {
     myencoder.encode(out);
   };
   /**
-   * Retrieves the GIF stream
-   */
+  * Retrieves the GIF stream
+  */
 
 
   var stream = exports.stream = function stream() {
@@ -2577,20 +2584,19 @@ function GIFEncoder() {
 
   return exports;
 }
-;
 // CONCATENATED MODULE: ./src/screens/export/b64.js
 function encode64(input) {
-  var output = "",
-      i = 0,
-      l = input.length,
-      key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-      chr1,
-      chr2,
-      chr3,
-      enc1,
-      enc2,
-      enc3,
-      enc4;
+  var output = '';
+  var i = 0;
+  var l = input.length;
+  var key = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  var chr1;
+  var chr2;
+  var chr3;
+  var enc1;
+  var enc2;
+  var enc3;
+  var enc4;
 
   while (i < l) {
     chr1 = input.charCodeAt(i++);
@@ -2607,12 +2613,11 @@ function encode64(input) {
   return output;
 }
 // CONCATENATED MODULE: ./src/screens/export/export.js
-// eslint-disable-next-line no-unused-vars
 
 
 
 
-function getExport() {
+function initExport() {
   var exportBtn = document.createElement('a');
   exportBtn.className = 'download';
   exportBtn.innerHTML = '<i class="fas fa-save"></i>';
@@ -2685,10 +2690,9 @@ function getExport() {
   document.addEventListener('keydown', getKey);
 }
 // CONCATENATED MODULE: ./src/components/modal-dialog/keyboard-modal.js
-// eslint-disable-next-line no-unused-vars
 
 
-function getKeyboardModal() {
+function initKeyboardModal() {
   var modalWindow = document.createElement('div');
   modalWindow.className = 'modal--window';
   document.body.appendChild(modalWindow);
@@ -2962,6 +2966,7 @@ function getKeyboardModal() {
 
     for (var i = 0; i < keysArr.length; i += 1) {
       if (keysArr[i].innerText === str) {
+        document.querySelector(".hint--key.".concat(keysArr[i].id)).innerText = '(?)';
         keysArr[i].innerText = '?';
       }
     }
@@ -2977,6 +2982,7 @@ function getKeyboardModal() {
         e.preventDefault();
         text = "Ctrl + ".concat(codeFromKey(e.code));
         searchForDuplicate(text);
+        document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
         selectedKey.innerText = text;
 
         if (selectedKey) {
@@ -2990,6 +2996,7 @@ function getKeyboardModal() {
         e.preventDefault();
         text = "Shift + ".concat(codeFromKey(e.code));
         searchForDuplicate(text);
+        document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
         selectedKey.innerText = text;
 
         if (selectedKey) {
@@ -3003,6 +3010,7 @@ function getKeyboardModal() {
         e.preventDefault();
         text = "Alt + ".concat(codeFromKey(e.code));
         searchForDuplicate(text);
+        document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
         selectedKey.innerText = text;
 
         if (selectedKey) {
@@ -3014,6 +3022,7 @@ function getKeyboardModal() {
     } else if (Object.values(keyCodes).includes(e.code)) {
       text = codeFromKey(e.code);
       searchForDuplicate(text);
+      document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
       selectedKey.innerText = text;
 
       if (selectedKey) {
@@ -3040,7 +3049,7 @@ function getKeyboardModal() {
 /* eslint-disable no-unused-vars */
 
 /* eslint-disable no-undef */
-function getAuth() {
+function init() {
   var provider = new firebase.auth.GoogleAuthProvider();
   document.querySelector('#signIn').addEventListener('click', function () {
     firebase.auth().signInWithPopup(provider).then(function (result) {
@@ -3060,8 +3069,75 @@ function getAuth() {
     });
   });
 }
+// CONCATENATED MODULE: ./src/components/modal-dialog/hints.js
+
+function initHints() {
+  var penToolHint = document.createElement('span');
+  penToolHint.className = 'hint';
+  penToolHint.innerText = 'Pen tool ';
+  document.querySelector('#penTool').appendChild(penToolHint);
+  var penToolHintKey = document.createElement('span');
+  penToolHintKey.className = 'hint--key penKey';
+  penToolHintKey.innerText = '(P)';
+  penToolHint.appendChild(penToolHintKey);
+  var pickerToolHint = document.createElement('span');
+  pickerToolHint.className = 'hint';
+  pickerToolHint.innerText = 'Color picker tool ';
+  document.querySelector('#colorPickerTool').appendChild(pickerToolHint);
+  var pickerToolHintKey = document.createElement('span');
+  pickerToolHintKey.className = 'hint--key pickerKey';
+  pickerToolHintKey.innerText = '(C)';
+  pickerToolHint.appendChild(pickerToolHintKey);
+  var paintBucketToolHint = document.createElement('span');
+  paintBucketToolHint.className = 'hint';
+  paintBucketToolHint.innerText = 'Paint bucket tool ';
+  document.querySelector('#paintBucketTool').appendChild(paintBucketToolHint);
+  var paintBucketToolHintKey = document.createElement('span');
+  paintBucketToolHintKey.className = 'hint--key paintBucketKey';
+  paintBucketToolHintKey.innerText = '(B)';
+  paintBucketToolHint.appendChild(paintBucketToolHintKey);
+  var magicPaintToolHint = document.createElement('span');
+  magicPaintToolHint.className = 'hint';
+  magicPaintToolHint.innerText = 'Paint all same pixels tool ';
+  document.querySelector('#paintSamePixTool').appendChild(magicPaintToolHint);
+  var magicPaintToolHintKey = document.createElement('span');
+  magicPaintToolHintKey.className = 'hint--key magicPaintKey';
+  magicPaintToolHintKey.innerText = '(A)';
+  magicPaintToolHint.appendChild(magicPaintToolHintKey);
+  var eraserToolHint = document.createElement('span');
+  eraserToolHint.className = 'hint';
+  eraserToolHint.innerText = 'Eraser tool ';
+  document.querySelector('#eraserTool').appendChild(eraserToolHint);
+  var eraserToolHintKey = document.createElement('span');
+  eraserToolHintKey.className = 'hint--key eraserKey';
+  eraserToolHintKey.innerText = '(E)';
+  eraserToolHint.appendChild(eraserToolHintKey);
+  var penSizeHint = document.createElement('span');
+  penSizeHint.className = 'hint pen_size';
+  penSizeHint.innerHTML = 'Pen size<br>from 1 to 4 pixels';
+  document.querySelector('.tools_panel--pen_size--wrapper').appendChild(penSizeHint);
+  var shortcutsHint = document.createElement('span');
+  shortcutsHint.className = 'hint shortcuts';
+  shortcutsHint.innerText = 'Keyboard shortcuts';
+  document.querySelector('.modal--button').appendChild(shortcutsHint);
+  var exportHint = document.createElement('span');
+  exportHint.className = 'hint';
+  exportHint.innerText = 'Export as .gif ';
+  document.querySelector('.download').appendChild(exportHint);
+  var exportHintKey = document.createElement('span');
+  exportHintKey.className = 'hint--key exportKey';
+  exportHintKey.innerText = '(Ctrl + E)';
+  exportHint.appendChild(exportHintKey);
+  var fullScreenHint = document.createElement('span');
+  fullScreenHint.className = 'hint full-screen';
+  fullScreenHint.innerText = 'Open animation on full screen ';
+  document.querySelector('.full_screen').appendChild(fullScreenHint);
+  var fullScreenHintKey = document.createElement('span');
+  fullScreenHintKey.className = 'hint--key fullScreenKey';
+  fullScreenHintKey.innerText = '(F)';
+  fullScreenHint.appendChild(fullScreenHintKey);
+}
 // CONCATENATED MODULE: ./src/app.js
-// eslint-disable-next-line no-unused-vars
 
 
 
@@ -3069,12 +3145,14 @@ function getAuth() {
 
 
 
-getKeyboardModal();
-getCanvasTools();
-getFrames();
-getPreview();
-getExport();
-getAuth();
+
+initKeyboardModal();
+initCanvasTools();
+initFrames();
+initPreview();
+initExport();
+initHints();
+init();
 
 /***/ })
 /******/ ]);
