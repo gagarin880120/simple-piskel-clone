@@ -215,6 +215,28 @@ function getRGBAObjFromHex(str) {
   };
 }
 
+function colorMatch(a, b) {
+  return a.r === b.r && a.g === b.g && a.b === b.b && a.a === b.a;
+}
+
+function getShortcutsText(keys) {
+  var arr = [];
+
+  for (var i = 0; i < keys.length; i += 1) {
+    arr.push(keys[i].textContent);
+  }
+
+  return arr.join();
+}
+
+function setShortcutsText(string, keys) {
+  var arr = string.split(',');
+
+  for (var i = 0; i < keys.length; i += 1) {
+    keys[i].innerText = arr[i];
+  }
+}
+
 
 // CONCATENATED MODULE: ./src/components/modal-dialog/keyboard-codes.js
 var keyCodes = {
@@ -313,6 +335,7 @@ function initCanvasTools() {
 
   matrixInput.addEventListener('input', function () {
     matrixSize = 32 * Math.pow(2, matrixInput.value);
+    localStorage.setItem('matrixSize', matrixSize);
     resizeMatrix(matrixSize);
   });
   var primaryColor = '#ff00ff';
@@ -326,12 +349,14 @@ function initCanvasTools() {
     colorInputPrimary.value = primaryColor;
     colorInputPrimary.addEventListener('input', function (e) {
       primaryColor = e.target.value;
+      localStorage.setItem('primColor', primaryColor);
       updateColorEl(primaryColorEl, primaryColor);
     });
     colorInputPrimary.select();
     colorInputSecondary.value = secondaryColor;
     colorInputSecondary.addEventListener('input', function (e) {
       secondaryColor = e.target.value;
+      localStorage.setItem('secColor', secondaryColor);
       updateColorEl(secondaryColorEl, secondaryColor);
     });
     colorInputSecondary.select();
@@ -360,30 +385,36 @@ function initCanvasTools() {
     if (currentTool === 'color-picker') {
       if (e.buttons === 2) {
         secondaryColor = pickColour(e);
+        localStorage.setItem('secColor', secondaryColor);
         updateColorEl(secondaryColorEl, secondaryColor);
       } else {
         primaryColor = pickColour(e);
+        localStorage.setItem('primColor', primaryColor);
         updateColorEl(primaryColorEl, primaryColor);
       }
     }
   });
   var lineThickness = 1;
-  var penSizes = document.querySelectorAll('.tools_panel--pen_size--container');
-  penSizes[0].classList.toggle('active_size');
 
-  var _loop = function _loop(i) {
-    // eslint-disable-next-line no-loop-func
-    penSizes[i].addEventListener('click', function () {
+  function initPenSize() {
+    if (document.querySelector('.active_size')) {
       document.querySelector('.active_size').classList.remove('active_size');
-      penSizes[i].classList.toggle('active_size');
-      lineThickness = i + 1;
-    });
-  };
+    }
 
-  for (var i = 0; i < penSizes.length; i += 1) {
-    _loop(i);
+    document.querySelector(".size".concat(lineThickness)).parentElement.classList.toggle('active_size');
   }
 
+  document.querySelector('.tools_panel--pen_size--wrapper').addEventListener('click', function (e) {
+    if (e.target.className === 'tools_panel--pen_size--container') {
+      lineThickness = Number(e.target.firstElementChild.className.slice(-1));
+      localStorage.setItem('penSize', lineThickness);
+      initPenSize();
+    } else if (e.target.classList.contains('tools_panel--pen_size--square')) {
+      lineThickness = Number(e.target.className.slice(-1));
+      localStorage.setItem('penSize', lineThickness);
+      initPenSize();
+    }
+  });
   var lastX = 0;
   var lastY = 0;
   canvas.width = matrixSize;
@@ -541,10 +572,6 @@ function initCanvasTools() {
     data[4 * (width * y + x) + 3] = color.a;
   }
 
-  function colorMatch(a, b) {
-    return a.r === b.r && a.g === b.g && a.b === b.b && a.a === b.a;
-  }
-
   function floodFill(imageData, newColor, x, y) {
     if (currentTool !== 'paint-bucket') return;
     var width = imageData.width,
@@ -673,7 +700,7 @@ function initCanvasTools() {
     document.querySelector('.active_tool').classList.remove('active_tool');
     paintSamePixBtn.classList.toggle('active_tool');
   });
-  canvas.addEventListener('mousedown', initSamePixelPainter); // =============================KEYBOARD SHORTCUTS================================
+  canvas.addEventListener('mousedown', initSamePixelPainter);
 
   function penKeyAction() {
     currentTool = 'pen';
@@ -711,24 +738,24 @@ function initCanvasTools() {
   function increasePenSizeKeyAction() {
     if (lineThickness >= 4) {
       lineThickness = 1;
-      document.querySelector('.active_size').classList.remove('active_size');
-      penSizes[0].classList.toggle('active_size');
+      localStorage.setItem('penSize', lineThickness);
+      initPenSize();
     } else {
       lineThickness += 1;
-      document.querySelector('.active_size').classList.remove('active_size');
-      penSizes[lineThickness - 1].classList.toggle('active_size');
+      localStorage.setItem('penSize', lineThickness);
+      initPenSize();
     }
   }
 
   function decreasePenSizeKeyAction() {
     if (lineThickness <= 1) {
       lineThickness = 4;
-      document.querySelector('.active_size').classList.remove('active_size');
-      penSizes[3].classList.toggle('active_size');
+      localStorage.setItem('penSize', lineThickness);
+      initPenSize();
     } else {
       lineThickness -= 1;
-      document.querySelector('.active_size').classList.remove('active_size');
-      penSizes[lineThickness - 1].classList.toggle('active_size');
+      localStorage.setItem('penSize', lineThickness);
+      initPenSize();
     }
   }
 
@@ -776,13 +803,31 @@ function initCanvasTools() {
   document.querySelector('#createSprite').addEventListener('click', function () {
     window.open(document.location.href);
   });
+  window.addEventListener('load', function () {
+    if (localStorage.getItem('penSize')) {
+      lineThickness = Number(localStorage.getItem('penSize'));
+    }
 
-  window.onload = function () {
+    if (localStorage.getItem('matrixSize')) {
+      matrixSize = localStorage.getItem('matrixSize');
+      matrixInput.value = Math.log2(matrixSize / 32);
+      resizeMatrix(matrixSize);
+    }
+
+    if (localStorage.getItem('primColor')) {
+      primaryColor = localStorage.getItem('primColor');
+    }
+
+    if (localStorage.getItem('secColor')) {
+      secondaryColor = localStorage.getItem('secColor');
+    }
+
+    initPenSize();
     initColors();
     penToolAction();
     updateColorEl(primaryColorEl, primaryColor);
     updateColorEl(secondaryColorEl, secondaryColor);
-  };
+  });
 }
 // EXTERNAL MODULE: ./src/components/frames-list/frames-style.css
 var frames_style = __webpack_require__(6);
@@ -2692,6 +2737,7 @@ function initExport() {
 // CONCATENATED MODULE: ./src/components/modal-dialog/keyboard-modal.js
 
 
+
 function initKeyboardModal() {
   var modalWindow = document.createElement('div');
   modalWindow.className = 'modal--window';
@@ -2985,9 +3031,11 @@ function initKeyboardModal() {
 
         if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
           document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+          localStorage.setItem('hints', getShortcutsText(document.querySelectorAll('.hasKey')));
         }
 
         selectedKey.innerText = text;
+        localStorage.setItem('shortcuts', getShortcutsText(document.querySelectorAll('.modal--content--item--key')));
 
         if (selectedKey) {
           selectedKey.classList.remove('selected');
@@ -3003,9 +3051,11 @@ function initKeyboardModal() {
 
         if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
           document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+          localStorage.setItem('hints', getShortcutsText(document.querySelectorAll('.hasKey')));
         }
 
         selectedKey.innerText = text;
+        localStorage.setItem('shortcuts', getShortcutsText(document.querySelectorAll('.modal--content--item--key')));
 
         if (selectedKey) {
           selectedKey.classList.remove('selected');
@@ -3021,9 +3071,11 @@ function initKeyboardModal() {
 
         if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
           document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+          localStorage.setItem('hints', getShortcutsText(document.querySelectorAll('.hasKey')));
         }
 
         selectedKey.innerText = text;
+        localStorage.setItem('shortcuts', getShortcutsText(document.querySelectorAll('.modal--content--item--key')));
 
         if (selectedKey) {
           selectedKey.classList.remove('selected');
@@ -3037,9 +3089,11 @@ function initKeyboardModal() {
 
       if (document.querySelector(".hint--key.".concat(selectedKey.id))) {
         document.querySelector(".hint--key.".concat(selectedKey.id)).innerText = "(".concat(text, ")");
+        localStorage.setItem('hints', getShortcutsText(document.querySelectorAll('.hasKey')));
       }
 
       selectedKey.innerText = text;
+      localStorage.setItem('shortcuts', getShortcutsText(document.querySelectorAll('.modal--content--item--key')));
 
       if (selectedKey) {
         selectedKey.classList.remove('selected');
@@ -3093,7 +3147,7 @@ function initHints() {
   penToolHint.innerText = 'Pen tool ';
   document.querySelector('#penTool').appendChild(penToolHint);
   var penToolHintKey = document.createElement('span');
-  penToolHintKey.className = 'hint--key penKey';
+  penToolHintKey.className = 'hint--key penKey hasKey';
   penToolHintKey.innerText = '(P)';
   penToolHint.appendChild(penToolHintKey);
   var pickerToolHint = document.createElement('span');
@@ -3101,7 +3155,7 @@ function initHints() {
   pickerToolHint.innerText = 'Color picker tool ';
   document.querySelector('#colorPickerTool').appendChild(pickerToolHint);
   var pickerToolHintKey = document.createElement('span');
-  pickerToolHintKey.className = 'hint--key pickerKey';
+  pickerToolHintKey.className = 'hint--key pickerKey hasKey';
   pickerToolHintKey.innerText = '(C)';
   pickerToolHint.appendChild(pickerToolHintKey);
   var paintBucketToolHint = document.createElement('span');
@@ -3109,7 +3163,7 @@ function initHints() {
   paintBucketToolHint.innerText = 'Paint bucket tool ';
   document.querySelector('#paintBucketTool').appendChild(paintBucketToolHint);
   var paintBucketToolHintKey = document.createElement('span');
-  paintBucketToolHintKey.className = 'hint--key paintBucketKey';
+  paintBucketToolHintKey.className = 'hint--key paintBucketKey hasKey';
   paintBucketToolHintKey.innerText = '(B)';
   paintBucketToolHint.appendChild(paintBucketToolHintKey);
   var magicPaintToolHint = document.createElement('span');
@@ -3117,7 +3171,7 @@ function initHints() {
   magicPaintToolHint.innerText = 'Paint all same pixels tool ';
   document.querySelector('#paintSamePixTool').appendChild(magicPaintToolHint);
   var magicPaintToolHintKey = document.createElement('span');
-  magicPaintToolHintKey.className = 'hint--key magicPaintKey';
+  magicPaintToolHintKey.className = 'hint--key magicPaintKey hasKey';
   magicPaintToolHintKey.innerText = '(A)';
   magicPaintToolHint.appendChild(magicPaintToolHintKey);
   var eraserToolHint = document.createElement('span');
@@ -3125,7 +3179,7 @@ function initHints() {
   eraserToolHint.innerText = 'Eraser tool ';
   document.querySelector('#eraserTool').appendChild(eraserToolHint);
   var eraserToolHintKey = document.createElement('span');
-  eraserToolHintKey.className = 'hint--key eraserKey';
+  eraserToolHintKey.className = 'hint--key eraserKey hasKey';
   eraserToolHintKey.innerText = '(E)';
   eraserToolHint.appendChild(eraserToolHintKey);
   var penSizeHint = document.createElement('span');
@@ -3141,7 +3195,7 @@ function initHints() {
   exportHint.innerText = 'Export as .gif ';
   document.querySelector('.download').appendChild(exportHint);
   var exportHintKey = document.createElement('span');
-  exportHintKey.className = 'hint--key exportKey';
+  exportHintKey.className = 'hint--key exportKey hasKey';
   exportHintKey.innerText = '(Ctrl + E)';
   exportHint.appendChild(exportHintKey);
   var fullScreenHint = document.createElement('span');
@@ -3149,11 +3203,12 @@ function initHints() {
   fullScreenHint.innerText = 'Open animation on full screen ';
   document.querySelector('.full_screen').appendChild(fullScreenHint);
   var fullScreenHintKey = document.createElement('span');
-  fullScreenHintKey.className = 'hint--key fullScreenKey';
+  fullScreenHintKey.className = 'hint--key fullScreenKey hasKey';
   fullScreenHintKey.innerText = '(F)';
   fullScreenHint.appendChild(fullScreenHintKey);
 }
 // CONCATENATED MODULE: ./src/app.js
+
 
 
 
@@ -3169,6 +3224,13 @@ initPreview();
 initExport();
 initHints();
 initAuth();
+window.addEventListener('load', function () {
+  if (localStorage.getItem('shortcuts')) {
+    var shortcuts = localStorage.getItem('shortcuts');
+    setShortcutsText(shortcuts, document.querySelectorAll('.modal--content--item--key'));
+    setShortcutsText(localStorage.getItem('hints'), document.querySelectorAll('.hasKey'));
+  }
+});
 
 /***/ })
 /******/ ]);
